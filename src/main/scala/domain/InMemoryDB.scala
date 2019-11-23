@@ -8,4 +8,8 @@ object InMemoryDB {
 
   val posts = new ListBuffer[ForumPost]
 
+  def findPostWithGivenId(id: Int): Option[ForumPost]= {
+    posts.find(_.id == id)
+  }
+
 }

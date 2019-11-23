@@ -6,27 +6,21 @@ import akka.http.scaladsl.server.Route
 import domain.Domain.ForumPost
 import org.apache.commons.validator.routines.EmailValidator
 
-trait ForumPostValidation {
+trait FieldsValidation {
 
-  def validateForumPost(post: ForumPost)(inner: => Route): Route = {
+//  todo POROBIĆ VALUE CLASSY!!!!!
+  def validateFields(email: Option[String], nickname: Option[String], content: Option[String])
+                    (inner: => Route): Route = {
 
-    validate(validateEmail(post.email), "Email cannot be empty or malformed!") {
+    validate(validateEmail(email), "Email cannot be empty or malformed!") {
 
-      validate(checkNickname(post.nickname), "Nickname needs to have length between 1 and 21 characters") {
+      validate(checkNickname(nickname), "Nickname needs to have length between 1 and 21 characters") {
 
-        validate(checkTopic(post.topic), "Topic needs to have between 1 and 80 characters!") {
-
-          validate(checkContent(post.content), "Content needs to have beetween 1 and 400 characters!") {
+          validate(checkContent(content), "Content needs to have beetween 1 and 400 characters!") {
             inner
           }
-        }
       }
     }
-  }
-
-  def successfulPost(post: ForumPost): Route = {
-    complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,
-      s"""<h1>Post created successfully!</h1>""".stripMargin))
   }
 
   private def validateEmail(email: Option[String]): Boolean = {
@@ -38,13 +32,13 @@ trait ForumPostValidation {
     }
   }
 
-  import ForumPostValidation._
+  import FieldsValidation._
   private def checkNickname(nick: Option[String]): Boolean = nick match {
     case Some(n) => if (n.length < minimumLength || n.length > maxNickLength) false else true
     case None    => false
   }
 
-  private def checkTopic(topic: Option[String]): Boolean = topic match {
+  def checkTopic(topic: Option[String]): Boolean = topic match {
     case Some(t) => if (t.length < minimumLength || t.length > maxTopicLength) false else true
     case None    => false
   }
@@ -55,7 +49,7 @@ trait ForumPostValidation {
   }
 }
 
-object ForumPostValidation {
+object FieldsValidation {
   val maxNickLength    = 21
   val maxTopicLength   = 80
   val maxContentLength = 400

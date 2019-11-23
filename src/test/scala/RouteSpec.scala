@@ -5,7 +5,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 class RouteSpec extends WordSpec with Matchers with ScalatestRouteTest {
 
-  import domain.Paths._
+  import domain.PathNames._
   import route.Routes._
 
   //https://doc.akka.io/docs/akka-http/current/routing-dsl/testkit.html

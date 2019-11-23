@@ -4,7 +4,7 @@ import akka.stream.ActorMaterializer
 
 object Server extends App {
 
-  private implicit val system = ActorSystem("kafeteria")
+  private implicit val system = ActorSystem("4chan")
   private implicit val materializer = ActorMaterializer()
   private implicit val ec = system.dispatcher
 

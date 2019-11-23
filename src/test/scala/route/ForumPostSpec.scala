@@ -5,15 +5,18 @@ import akka.http.scaladsl.model.{ContentTypes, MessageEntity, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import domain.Domain.ForumPost
+import domain.logic.ForumJSONSupport
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.{Matchers, WordSpec}
 
-class ForumPostSpec extends WordSpec with Matchers with ScalatestRouteTest {
+class ForumPostSpec extends WordSpec with Matchers with ScalatestRouteTest with ForumJSONSupport {
 
   import route.Routes._
+  import domain.PathNames._
 
-  val path = "/create-post"
+  val path = "/" + CreatePost
   val forumPost = ForumPost(
+    id       = 1,
     topic    = Some("Hi!"),
     nickname = Some("thesaurus"),
     content  = Some("How do I learn coding?"),
