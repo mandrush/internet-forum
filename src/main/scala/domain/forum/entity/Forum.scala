@@ -1,4 +1,4 @@
-package domain
+package domain.forum.entity
 
 object Forum {
 //todo tu by sie przydala jakas hierarchia klas, jakis polimorfizm - nie udalo sie tego teraz napisac, bo ze sprayem byly problemy

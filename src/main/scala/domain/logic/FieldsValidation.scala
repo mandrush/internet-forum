@@ -3,7 +3,7 @@ package domain.logic
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives.{complete, validate}
 import akka.http.scaladsl.server.Route
-import domain.Forum.ForumPost
+import domain.forum.entity.Forum.ForumPost
 import org.apache.commons.validator.routines.EmailValidator
 
 trait FieldsValidation {
