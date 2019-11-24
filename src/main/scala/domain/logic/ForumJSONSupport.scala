@@ -1,6 +1,6 @@
 package domain.logic
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import domain.Domain.{ForumPost, ForumResponse, BasicForumEntity}
+import domain.Forum.{ForumPost, ForumResponse, BasicForumEntity}
 import spray.json.DefaultJsonProtocol
 //https://doc.akka.io/docs/akka-http/current/common/json-support.html
 trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {

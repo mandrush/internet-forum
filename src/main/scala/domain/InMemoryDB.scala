@@ -1,6 +1,6 @@
 package domain
 
-import domain.Domain.ForumPost
+import domain.Forum.ForumPost
 
 import scala.collection.mutable.ListBuffer
 

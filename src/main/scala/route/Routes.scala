@@ -7,7 +7,7 @@ import domain.logic.{ForumJSONSupport, FieldsValidation}
 
 object Routes extends ForumJSONSupport with FieldsValidation {
 
-  import domain.Domain._
+  import domain.Forum._
   import domain.PathNames._
   import domain.InMemoryDB._
   import route.CompletionRoutes._

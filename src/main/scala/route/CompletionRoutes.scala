@@ -3,7 +3,7 @@ package route
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives.complete
 import akka.http.scaladsl.server.Route
-import domain.Domain.{ForumPost, ForumResponse}
+import domain.Forum.{ForumPost, ForumResponse}
 import domain.logic.ForumJSONSupport
 
 object CompletionRoutes extends ForumJSONSupport {

@@ -4,7 +4,7 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{ContentTypes, MessageEntity, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import domain.Domain
+import domain.Forum
 import domain.logic.ForumJSONSupport
 import org.scalatest.{Matchers, WordSpec}
 import route.Routes.mainRoute
@@ -12,7 +12,7 @@ import org.scalatest.concurrent.ScalaFutures._
 
 class ForumResponseSpec extends WordSpec with Matchers with ScalatestRouteTest with ForumJSONSupport {
 
-  import Domain._
+  import Forum._
   import domain.InMemoryDB._
   import domain.PathNames._
 

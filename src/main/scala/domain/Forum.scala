@@ -1,6 +1,6 @@
 package domain
 
-object Domain {
+object Forum {
 //todo tu by sie przydala jakas hierarchia klas, jakis polimorfizm - nie udalo sie tego teraz napisac, bo ze sprayem byly problemy
   final case class ForumPost(id: Int,
                              topic: Option[String],
