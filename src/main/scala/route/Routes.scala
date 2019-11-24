@@ -38,13 +38,15 @@ object Routes extends ForumJSONSupport with FieldsValidation {
       post {
         path(CreateResponse / IntNumber) { id =>
           entity(as[BasicForumEntity]) { userResp =>
-            findPostWithGivenId(id) match {
-              case Some(topicPost) =>
-                validateFields(userResp.email, userResp.nickname, userResp.content) {
-                  val responseToTopic = ForumResponse(topicPost, userResp.content, userResp.nickname, userResp.email)
-                  successfulResponse(responseToTopic)
-                }
-              case None            => complete(StatusCodes.NotFound)
+            validate(userResp.topic.isEmpty, "Topic can't be included here!!") {
+              findPostWithGivenId(id) match {
+                case Some(topicPost) =>
+                  validateFields(userResp.email, userResp.nickname, userResp.content) {
+                    val responseToTopic = ForumResponse(topicPost, userResp.content, userResp.nickname, userResp.email)
+                    successfulResponse(responseToTopic)
+                  }
+                case None            => complete(StatusCodes.NotFound)
+              }
             }
           }
         }

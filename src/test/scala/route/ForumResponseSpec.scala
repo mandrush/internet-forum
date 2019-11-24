@@ -39,17 +39,23 @@ class ForumResponseSpec extends WordSpec with Matchers with ScalatestRouteTest w
   private val marshalled = Marshal(userIssuedPost).to[MessageEntity].futureValue
   private val properId = mainPost.id
 
-  "Forum response" should {
-    "be created after a user submits a POST request with nickname, content and email" in {
-
+  s"POST request for $path" should {
+    "create a forum response after a user submits a request with nickname, content and email" in {
       Post(s"$path/$properId").withEntity(marshalled) ~> Route.seal(mainRoute) ~> check {
         status shouldBe StatusCodes.OK
         contentType shouldBe ContentTypes.`application/json`
       }
     }
 
+    "NOT create a forum response after a request containing a topic is sent" in {
+      val wrong = Marshal(userIssuedPost.copy(topic = Some("A"))).to[MessageEntity].futureValue
+      Post(s"$path/$properId").withEntity(wrong) ~> Route.seal(mainRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+    }
+
     "respond with 404 Not Found if there's no such topic with such id" in {
-      val invalidId = "123"
+      val invalidId = "1232"
       Post(s"$path/$invalidId").withEntity(marshalled) ~> Route.seal(mainRoute) ~> check {
         status shouldBe StatusCodes.NotFound
       }
