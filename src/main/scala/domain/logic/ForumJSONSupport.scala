@@ -6,5 +6,5 @@ import spray.json.DefaultJsonProtocol
 trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val postFormat = jsonFormat5(ForumPost)
   implicit val forumResponseFormat = jsonFormat4(ForumResponse)
-  implicit val userResponseFormat = jsonFormat3(BasicForumEntity)
+  implicit val userRequestFormat = jsonFormat4(BasicForumEntity)
 }

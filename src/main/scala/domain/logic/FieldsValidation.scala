@@ -1,14 +1,13 @@
 package domain.logic
 
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives.{complete, validate}
+import akka.http.scaladsl.server.Directives.validate
 import akka.http.scaladsl.server.Route
-import domain.forum.entity.Forum.ForumPost
 import org.apache.commons.validator.routines.EmailValidator
 
 trait FieldsValidation {
 
-//  todo POROBIĆ VALUE CLASSY!!!!!
+//  value classes would be great here, as a potential developer wouldn't be able to mistake one field with another (all are of type Option[String])
+//  however, I ran into some problems with spray-json not serializing the fields as I would like it to so no value classes for now
   def validateFields(email: Option[String], nickname: Option[String], content: Option[String])
                     (inner: => Route): Route = {
 

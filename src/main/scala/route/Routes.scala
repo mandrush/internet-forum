@@ -3,7 +3,9 @@ package route
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives.{complete, concat, get, path, post, _}
 import akka.http.scaladsl.server.{Route, StandardRoute}
-import domain.logic.{ForumJSONSupport, FieldsValidation}
+import domain.logic.{FieldsValidation, ForumJSONSupport}
+
+import scala.util.Random
 
 object Routes extends ForumJSONSupport with FieldsValidation {
 
@@ -21,11 +23,13 @@ object Routes extends ForumJSONSupport with FieldsValidation {
       },
       post {
         path(CreatePost) {
-          entity(as[ForumPost]) { post =>
-            validateFields(post.email, post.nickname, post.content) {
-              validate(checkTopic(post.topic), "Topic needs to have between 1 and 80 characters!") {
-                posts += post
-                successfulPost(post)
+          entity(as[BasicForumEntity]) { request =>
+            validateFields(request.email, request.nickname, request.content) {
+              validate(checkTopic(request.topic), "Topic needs to have between 1 and 80 characters!") {
+//                todo: random for now, when db is in place put a new record
+                val newPost = ForumPost(Random.nextInt(10), request.topic, request.content, request.nickname, request.email)
+                posts += newPost
+                successfulPost(newPost)
               }
             }
           }
@@ -40,7 +44,7 @@ object Routes extends ForumJSONSupport with FieldsValidation {
                   val responseToTopic = ForumResponse(topicPost, userResp.content, userResp.nickname, userResp.email)
                   successfulResponse(responseToTopic)
                 }
-              case None       => complete(StatusCodes.NotFound)
+              case None            => complete(StatusCodes.NotFound)
             }
           }
         }

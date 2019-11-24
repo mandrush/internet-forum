@@ -13,7 +13,8 @@ object Forum {
                                  nickname: Option[String],
                                  email: Option[String])
 
-  final case class BasicForumEntity(content: Option[String],
+  final case class BasicForumEntity(topic:Option[String],
+                                    content: Option[String],
                                     nickname: Option[String],
                                     email: Option[String])
 

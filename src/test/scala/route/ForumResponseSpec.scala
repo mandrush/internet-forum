@@ -29,6 +29,7 @@ class ForumResponseSpec extends WordSpec with Matchers with ScalatestRouteTest w
   )
 
   val userIssuedPost = BasicForumEntity(
+    topic    = None,
     nickname = Some("jasio"),
     content  = Some("work hard bro"),
     email    = Some("jasio@wp.pl")
