@@ -11,3 +11,4 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 libraryDependencies += "commons-validator" % "commons-validator" % "1.4.0"
+libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.9"
