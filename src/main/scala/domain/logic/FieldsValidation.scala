@@ -36,7 +36,7 @@ trait FieldsValidation {
   }
 
   def checkField(field: Requested, minLen: Int, maxLen: Int): Boolean = field.inner match {
-    case Some(f) => if (f.length < minLen || f.length > maxLen) false else true
+    case Some(f) => f.length >= minLen && f.length <= maxLen
     case None    => false
   }
 

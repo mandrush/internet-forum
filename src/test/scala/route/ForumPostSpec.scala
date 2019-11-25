@@ -7,7 +7,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import domain.forum.Forum.ForumPost
 import domain.logic.ForumJSONSupport
-import domain.request.UserRequests.{UserCostam, UserCreatePost, UserReply}
+import domain.request.UserRequests.{UserCreatePost, UserReply}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 
@@ -17,14 +17,20 @@ class ForumPostSpec extends WordSpec with Matchers with ScalatestRouteTest with 
   import route.Routes._
 
   val path = "/" + CreatePost
-  val userPostRequest = UserCostam(
+  val userPostRequest = UserCreatePost(
     topic    = Some("Hi!"),
     nickname = Some("thesaurus"),
     content  = Some("How do I learn coding?"),
     email    = Some("dziendobry@dowidzenia.pl")
   )
 
-  private def marshalledNewPost(modified: UserCostam): MessageEntity = Marshal(modified).to[MessageEntity].futureValue
+  val userReplyRequest = UserReply(
+    nickname = Some("thesaurus"),
+    content  = Some("How do I learn coding?"),
+    email    = Some("dziendobry@dowidzenia.pl")
+  )
+
+  private def marshalledNewPost(modified: UserCreatePost): MessageEntity = Marshal(modified).to[MessageEntity].futureValue
 
   s"POST request for $path" should {
     "create a forum post" in {
@@ -37,6 +43,13 @@ class ForumPostSpec extends WordSpec with Matchers with ScalatestRouteTest with 
         newpost.topic shouldBe userPostRequest.topic
         newpost.content shouldBe userPostRequest.content
         newpost.email shouldBe userPostRequest.email
+      }
+    }
+
+    "NOT create a new post after a wrong request is sent" in {
+      val wrong = Marshal(userReplyRequest).to[MessageEntity].futureValue
+      Post(s"$path").withEntity(wrong) ~> Route.seal(mainRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
       }
     }
 

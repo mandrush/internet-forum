@@ -2,7 +2,7 @@ package route
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives.{complete, concat, entity, get, path, post, _}
-import akka.http.scaladsl.server.{Route, StandardRoute}
+import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route, StandardRoute}
 import domain.forum.Forum.{ForumPost, ForumResponse}
 import domain.logic.{FieldsValidation, ForumJSONSupport}
 import domain.request.UserRequests.{UserCreatePost, UserReply}
@@ -21,6 +21,8 @@ object Routes extends ForumJSONSupport with FieldsValidation {
   implicit val cCfg = ContemporaryConfig()
 
   import domain.logic.fields.RequestFields._
+  import domain.rejection.Rejections._
+
   val mainRoute: Route =
     concat(
       get {
@@ -30,13 +32,19 @@ object Routes extends ForumJSONSupport with FieldsValidation {
       },
       post {
         path(CreatePost) {
-          entity(as[UserCreatePost]) { request =>
-            validateFields(Email(request.email), Nickname(request.nickname), Content(request.content)) {
-              validate(checkField(Topic(request.topic), cCfg.minLen, cCfg.maxTopic),
-                "Topic needs to have between 1 and 80 characters!") {
-                val newPost = ForumPost(Random.nextInt(10), request.topic, request.content, request.nickname, request.email)
-                posts += newPost
-                successfulPost(newPost)
+          entity(as[JsValue]) { req =>
+            if (!onlyContains(req, "topic", "content", "nickname", "email")) {
+              reject(MalformedFormFieldRejection("", "Only topic, content, nickname and email fields are allowed"))
+            } else {
+              entity(as[UserCreatePost]) { request =>
+                validateFields(Email(request.email), Nickname(request.nickname), Content(request.content)) {
+                  validate(checkField(Topic(request.topic), cCfg.minLen, cCfg.maxTopic),
+                    "Topic needs to have between 1 and 80 characters!") {
+                    val newPost = ForumPost(Random.nextInt(10), request.topic, request.content, request.nickname, request.email)
+                    posts += newPost
+                    successfulPost(newPost)
+                  }
+                }
               }
             }
           }
@@ -45,7 +53,9 @@ object Routes extends ForumJSONSupport with FieldsValidation {
       post {
         path(CreateReply / IntNumber) { id =>
           entity(as[JsValue]) { req =>
-            if (req.asJsObject.fields.contains("topic")) reject
+            if (!onlyContains(req, "nickname", "content", "email")) {
+              reject(MalformedFormFieldRejection("", s"Only content, nickname and email fields are allowed here"))
+            }
             else {
               entity(as[UserReply]) { reply =>
                 findPostWithGivenId(id) match {
@@ -66,5 +76,5 @@ object Routes extends ForumJSONSupport with FieldsValidation {
 
   private def hello: StandardRoute = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>Say hello</h1>"))
 
-
+  private def onlyContains(req: JsValue, fields: String*): Boolean = req.asJsObject.fields.keySet equals fields.toSet
 }

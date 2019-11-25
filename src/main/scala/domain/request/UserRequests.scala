@@ -9,12 +9,6 @@ object UserRequests {
                                    email: Option[String]
                                  )
 
-  final case class UserCostam(
-                                   topic: Option[String],
-                                   content: Option[String],
-                                   nickname: Option[String],
-                                   email: Option[String]
-                                 )
 
   final case class UserReply(
                               content: Option[String],
