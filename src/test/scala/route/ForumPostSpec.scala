@@ -5,8 +5,9 @@ import akka.http.scaladsl.model.{ContentTypes, MessageEntity, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import domain.forum.entity.Forum.{BasicForumEntity, ForumPost}
+import domain.forum.Forum.ForumPost
 import domain.logic.ForumJSONSupport
+import domain.request.UserRequests.{UserCostam, UserCreatePost, UserReply}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
 
@@ -16,14 +17,14 @@ class ForumPostSpec extends WordSpec with Matchers with ScalatestRouteTest with 
   import route.Routes._
 
   val path = "/" + CreatePost
-  val userPostRequest = BasicForumEntity(
+  val userPostRequest = UserCostam(
     topic    = Some("Hi!"),
     nickname = Some("thesaurus"),
     content  = Some("How do I learn coding?"),
     email    = Some("dziendobry@dowidzenia.pl")
   )
 
-  private def marshalledNewPost(modified: BasicForumEntity): MessageEntity = Marshal(modified).to[MessageEntity].futureValue
+  private def marshalledNewPost(modified: UserCostam): MessageEntity = Marshal(modified).to[MessageEntity].futureValue
 
   s"POST request for $path" should {
     "create a forum post" in {

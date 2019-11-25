@@ -1,19 +1,26 @@
 package route
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
-import akka.http.scaladsl.server.Directives.{complete, concat, get, path, post, _}
+import akka.http.scaladsl.server.Directives.{complete, concat, entity, get, path, post, _}
 import akka.http.scaladsl.server.{Route, StandardRoute}
+import domain.forum.Forum.{ForumPost, ForumResponse}
 import domain.logic.{FieldsValidation, ForumJSONSupport}
+import domain.request.UserRequests.{UserCreatePost, UserReply}
+import spray.json.JsValue
 
 import scala.util.Random
 
 object Routes extends ForumJSONSupport with FieldsValidation {
 
-  import domain.forum.entity.Forum._
-  import domain.PathNames._
   import domain.InMemoryDB._
+  import domain.PathNames._
   import route.CompletionRoutes._
 
+  sealed case class ContemporaryConfig(maxNick: Int = 21, maxTopic: Int = 80, maxContent: Int = 400, minLen: Int = 1)
+
+  implicit val cCfg = ContemporaryConfig()
+
+  import domain.logic.fields.RequestFields._
   val mainRoute: Route =
     concat(
       get {
@@ -23,10 +30,10 @@ object Routes extends ForumJSONSupport with FieldsValidation {
       },
       post {
         path(CreatePost) {
-          entity(as[BasicForumEntity]) { request =>
-            validateFields(request.email, request.nickname, request.content) {
-              validate(checkTopic(request.topic), "Topic needs to have between 1 and 80 characters!") {
-//                todo: random for now, when db is in place put a new record
+          entity(as[UserCreatePost]) { request =>
+            validateFields(Email(request.email), Nickname(request.nickname), Content(request.content)) {
+              validate(checkField(Topic(request.topic), cCfg.minLen, cCfg.maxTopic),
+                "Topic needs to have between 1 and 80 characters!") {
                 val newPost = ForumPost(Random.nextInt(10), request.topic, request.content, request.nickname, request.email)
                 posts += newPost
                 successfulPost(newPost)
@@ -36,19 +43,23 @@ object Routes extends ForumJSONSupport with FieldsValidation {
         }
       },
       post {
-        path(CreateResponse / IntNumber) { id =>
-          entity(as[BasicForumEntity]) { userResp =>
-            validate(userResp.topic.isEmpty, "Topic can't be included here!!") {
-              findPostWithGivenId(id) match {
-                case Some(topicPost) =>
-                  validateFields(userResp.email, userResp.nickname, userResp.content) {
-                    val responseToTopic = ForumResponse(topicPost, userResp.content, userResp.nickname, userResp.email)
-                    successfulResponse(responseToTopic)
-                  }
-                case None            => complete(StatusCodes.NotFound)
+        path(CreateReply / IntNumber) { id =>
+          entity(as[JsValue]) { req =>
+            if (req.asJsObject.fields.contains("topic")) reject
+            else {
+              entity(as[UserReply]) { reply =>
+                findPostWithGivenId(id) match {
+                  case Some(topicPost) =>
+                    validateFields(Email(reply.email), Nickname(reply.nickname), Content(reply.content)) {
+                      val responseToTopic = ForumResponse(Random.nextInt(10), topicPost, reply.content, reply.nickname, reply.email)
+                      successfulResponse(responseToTopic)
+                    }
+                  case None => complete(StatusCodes.NotFound)
+                }
               }
             }
           }
+
         }
       }
     )
