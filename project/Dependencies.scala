@@ -14,6 +14,7 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.0",
     "com.typesafe.akka" %% "akka-http-testkit" % "10.1.10",
     "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+    "com.h2database" % "h2" % "1.4.200" % Test
   )
 
   val commonsLang3 = Seq(
@@ -22,4 +23,7 @@ object Dependencies {
   )
 
   val slick = "com.typesafe.slick" %% "slick" % "3.3.2"
+
+  val postgres = "org.postgresql" % "postgresql" % "42.2.8"
+
 }
