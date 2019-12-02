@@ -3,22 +3,22 @@ package domain.request
 object UserRequests {
 
   final case class UserCreatePost(
-                                   topic: Option[String],
-                                   content: Option[String],
-                                   nickname: Option[String],
+                                   topic: String,
+                                   content: String,
+                                   nickname: String,
                                    email: Option[String]
                                  )
 
 
   final case class UserReply(
-                              content: Option[String],
-                              nickname: Option[String],
+                              content: String,
+                              nickname: String,
                               email: Option[String]
                             )
 
-  final case class UserEditPost(
-                                 newContent: Option[String],
-                                 secret: Option[String]
-                               )
+//  final case class UserEditPost(
+//                                 newContent: Option[String],
+//                                 secret: Option[String]
+//                               )
 
 }

@@ -1,27 +1,34 @@
 package route
 
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
+import java.time.Instant
+
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives.{complete, concat, entity, get, path, post, _}
 import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route, StandardRoute}
-import domain.forum.Forum.{ForumPost, ForumResponse}
-import domain.logic.{FieldsValidation, ForumJSONSupport}
+import database.layer.DatabaseLayer
+import database.schema.FieldsValueClasses._
+import database.schema.{ForumPost, ForumReply}
+import domain.logic.{FieldsValidation, ForumJSONSupport, SecretGenerator}
 import domain.request.UserRequests.{UserCreatePost, UserReply}
+import slick.jdbc.PostgresProfile
 import spray.json.JsValue
 
-import scala.util.Random
+import scala.util.{Failure, Success}
 
-object Routes extends ForumJSONSupport with FieldsValidation {
+object Routes extends
+  ForumJSONSupport with
+  FieldsValidation with
+  SecretGenerator {
 
-  import domain.InMemoryDB._
   import domain.PathNames._
-  import route.CompletionRoutes._
 
   sealed case class ContemporaryConfig(maxNick: Int = 21, maxTopic: Int = 80, maxContent: Int = 400, minLen: Int = 1)
 
   implicit val cCfg = ContemporaryConfig()
 
-  import domain.logic.fields.RequestFields._
-  import domain.rejection.Rejections._
+  val dbLayer = new DatabaseLayer(PostgresProfile)
+
+  import domain.rejection.ExceptionHandlers._
 
   val mainRoute: Route =
     concat(
@@ -37,12 +44,23 @@ object Routes extends ForumJSONSupport with FieldsValidation {
               reject(MalformedFormFieldRejection("", "Only topic, content, nickname and email fields are allowed"))
             } else {
               entity(as[UserCreatePost]) { request =>
-                validateFields(Email(request.email), Nickname(request.nickname), Content(request.content)) {
+                validateFields(request.email, Nickname(request.nickname), Content(request.content)) {
                   validate(checkField(Topic(request.topic), cCfg.minLen, cCfg.maxTopic),
                     "Topic needs to have between 1 and 80 characters!") {
-                    val newPost = ForumPost(Random.nextInt(10), request.topic, request.content, request.nickname, request.email)
-                    posts += newPost
-                    successfulPost(newPost)
+                    val newPost = ForumPost(Topic(request.topic),
+                      Content(request.content),
+                      Nickname(request.nickname),
+                      request.email,
+                      newSecret,
+                      Instant.now
+                    )
+                    val saved = dbLayer.exec(dbLayer.insertNewPost(newPost))
+                    handleExceptions(databaseExceptionHandler) {
+                      onComplete(saved) {
+                        case Success(_) => complete(newPost)
+                        case Failure(e) => throw e
+                      }
+                    }
                   }
                 }
               }
@@ -51,25 +69,39 @@ object Routes extends ForumJSONSupport with FieldsValidation {
         }
       },
       post {
-        path(CreateReply / IntNumber) { id =>
-          entity(as[JsValue]) { req =>
-            if (!onlyContains(req, "nickname", "content", "email")) {
-              reject(MalformedFormFieldRejection("", s"Only content, nickname and email fields are allowed here"))
-            }
-            else {
-              entity(as[UserReply]) { reply =>
-                findPostWithGivenId(id) match {
-                  case Some(topicPost) =>
-                    validateFields(Email(reply.email), Nickname(reply.nickname), Content(reply.content)) {
-                      val responseToTopic = ForumResponse(Random.nextInt(10), topicPost, reply.content, reply.nickname, reply.email)
-                      successfulResponse(responseToTopic)
+        path(CreateReply) {
+          parameter("topic") { topic =>
+            entity(as[JsValue]) { req =>
+              if (!onlyContains(req, "nickname", "content", "email")) {
+                reject(MalformedFormFieldRejection("", s"Only content, nickname and email fields are allowed here"))
+              }
+              else {
+                entity(as[UserReply]) { reply =>
+                  val maybePost = dbLayer.exec(dbLayer.findPostWithTopic(topic))
+                  handleExceptions(databaseExceptionHandler) {
+                    onComplete(maybePost) {
+                      case Success(p) => p match {
+                        case Some(found) =>
+                          val newReply = ForumReply(Content(reply.content),
+                            Nickname(reply.nickname),
+                            reply.email,
+                            Instant.now,
+                            newSecret,
+                            found.id)
+                          val saved = dbLayer.exec(dbLayer.insertNewReply(newReply))
+                          onComplete(saved) {
+                            case Success(_) => complete(newReply)
+                            case Failure(e) => throw e
+                          }
+                        case None => complete(HttpResponse(StatusCodes.NotFound))
+                      }
+                      case Failure(e) => throw e
                     }
-                  case None => complete(StatusCodes.NotFound)
+                  }
                 }
               }
             }
           }
-
         }
       }
     )

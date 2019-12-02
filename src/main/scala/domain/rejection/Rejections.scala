@@ -3,11 +3,10 @@ package domain.rejection
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{Rejection, _}
+import akka.http.scaladsl.server._
 
 object Rejections {
 
-  final case class TopicInResponseRequestRejection() extends Rejection
 
   implicit def rejectionHandler = RejectionHandler.newBuilder()
     .handle {

@@ -4,7 +4,7 @@ import database.Profile
 import database.schema.ForumReply
 import slick.jdbc.JdbcProfile
 
-trait ForumReplyModule { self: Profile =>
+trait ForumReplyModule { self : Profile =>
 
   val profile: JdbcProfile
 
@@ -12,6 +12,5 @@ trait ForumReplyModule { self: Profile =>
   import database.schema.ForumReplyOps._
 
   def insertNewReply(newReply: ForumReply) = insertReply += newReply
-
 
 }

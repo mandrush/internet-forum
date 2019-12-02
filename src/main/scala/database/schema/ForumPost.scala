@@ -36,7 +36,7 @@ class ForumPostTable(tag: Tag) extends Table[ForumPost](tag, "ForumPost") {
   def * : ProvenShape[ForumPost] = (topic, content, nickname, email, secret, timestamp, id) <> (ForumPost.tupled, ForumPost.unapply)
 }
 
-private[database] object ForumPostOps {
+object ForumPostOps {
 
   lazy val posts = TableQuery[ForumPostTable]
   lazy val insertPost = posts returning posts.map(_.id.value)

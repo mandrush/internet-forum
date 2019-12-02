@@ -2,44 +2,30 @@ package domain.logic
 
 import akka.http.scaladsl.server.Directives.validate
 import akka.http.scaladsl.server.Route
-import domain.logic.fields.RequestFields.{Content, Email, Nickname, Requested}
+import database.schema.FieldsValueClasses._
 import org.apache.commons.validator.routines.EmailValidator
 import route.Routes.ContemporaryConfig
 
-//todo: tu najlepiej bedzie dodac config z pliku z maksymalnymi dlugosciami postow contentu itd
-//todo: i wtedy przekazywac to jako implicit do validate fields
-
 trait FieldsValidation {
 
-  def validateFields(email: Email, nickname: Nickname, content: Content)
+  def validateFields(email: Option[String], nickname: Nickname, content: Content)
                     (inner: => Route)
                     (implicit cfg: ContemporaryConfig): Route = {
 
-    validate(validateEmail(email), "Email cannot be empty or malformed!") {
+    validate(validateEmail(email), "Email cannot be malformed!") {
 
-      validate(checkField(nickname, cfg.minLen, cfg.maxNick), "Nickname needs to have length between 1 and 21 characters") {
+      validate(checkField(nickname, cfg.minLen, cfg.maxNick), s"Nickname needs to have length between ${cfg.minLen} and ${cfg.maxNick} characters") {
 
-          validate(checkField(content, cfg.minLen, cfg.maxContent), "Content needs to have beetween 1 and 400 characters!") {
+          validate(checkField(content, cfg.minLen, cfg.maxContent), s"Content needs to have beetween ${cfg.minLen} and ${cfg.maxContent} characters!") {
             inner
           }
       }
     }
   }
+  //  using regex for this task is a BAD idea
+  //    see https://stackoverflow.com/questions/201323/how-to-validate-an-email-address-using-a-regular-expression
+  private def validateEmail(email: Option[String]): Boolean = email.forall(EmailValidator.getInstance().isValid(_))
 
-  private def validateEmail(email: Email): Boolean = {
-//  using regex for this task is a BAD idea
-//    see https://stackoverflow.com/questions/201323/how-to-validate-an-email-address-using-a-regular-expression
-    email.value match {
-      case Some(e) => EmailValidator.getInstance().isValid(e)
-      case None    => false
-    }
-  }
-
-  def checkField(field: Requested, minLen: Int, maxLen: Int): Boolean = field.inner match {
-    case Some(f) => f.length >= minLen && f.length <= maxLen
-    case None    => false
-  }
-
-
+  def checkField(field: Requested, minLen: Int, maxLen: Int): Boolean = field.inner.length >= minLen && field.inner.length <= maxLen
 
 }

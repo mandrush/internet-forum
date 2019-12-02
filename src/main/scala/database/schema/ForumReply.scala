@@ -12,6 +12,7 @@ case class ForumReply(
                        nickname: Nickname,
                        email: Option[String],
                        timestamp: Instant,
+                       secret: Secret,
                        parentId: PK[ForumPost],
                        id: PK[ForumReply] = PK[ForumReply](0L)
                      )
@@ -27,11 +28,13 @@ class ForumReplyTable(tag: Tag) extends Table[ForumReply](tag, "ForumReply") {
 
   def timestamp = column[Instant]("timestamp")
 
+  def secret = column[Secret]("secret")
+
   def parentId = column[PK[ForumPost]]("parent_id")
 
   def id = column[PK[ForumReply]]("reply_id")
 
-  override def * = (content, nickname, email, timestamp, parentId, id) <> (ForumReply.tupled, ForumReply.unapply)
+  override def * = (content, nickname, email, timestamp, secret, parentId, id) <> (ForumReply.tupled, ForumReply.unapply)
 
   def parent = foreignKey("post_fk", parentId, posts)(_.id, onDelete = Cascade, onUpdate = Cascade)
 
