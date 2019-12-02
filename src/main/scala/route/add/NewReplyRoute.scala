@@ -1,9 +1,8 @@
-package route
+package route.add
 
 import java.time.Instant
 
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import akka.http.scaladsl.server.Directives.{as, complete, entity, handleExceptions, onComplete, parameter, path, reject}
 import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route}
 import database.layer.DatabaseLayer
 import database.schema.FieldsValueClasses.{Content, Nickname}
@@ -14,17 +13,17 @@ import domain.rejection.ExceptionHandlers.databaseExceptionHandler
 import domain.request.UserRequests.UserReply
 import route.MainRoute.ContemporaryConfig
 import spray.json.JsValue
-
+import akka.http.scaladsl.server.Directives._
 import scala.util.{Failure, Success}
 
 object NewReplyRoute extends ForumJSONSupport
   with FieldsValidation
   with SecretGenerator {
 
-  def newReplyPath(implicit dbLayer: DatabaseLayer,
-                   cCfg: ContemporaryConfig): Route =
+  def newReplyRoute(implicit dbLayer: DatabaseLayer,
+                    cCfg: ContemporaryConfig): Route =
     path(CreateReply) {
-      parameter("topic") { topic =>
+      parameter('post_id.as[Long]) { postId =>
         entity(as[JsValue]) { req =>
           if (!onlyContains(req, "nickname", "content", "email")) {
             reject(MalformedFormFieldRejection("", s"Only content, nickname and email fields are allowed here"))
@@ -32,7 +31,7 @@ object NewReplyRoute extends ForumJSONSupport
           else {
             entity(as[UserReply]) { reply =>
               validateFields(reply.email, Nickname(reply.nickname), Content(reply.content)) {
-                val maybePost = dbLayer.exec(dbLayer.findPostWithTopic(topic))
+                val maybePost = dbLayer.exec(dbLayer.findPost(postId))
                 handleExceptions(databaseExceptionHandler) {
                   onComplete(maybePost) {
                     case Success(p) => p match {
@@ -48,7 +47,7 @@ object NewReplyRoute extends ForumJSONSupport
                           case Success(_) => complete(newReply)
                           case Failure(e) => throw e
                         }
-                      case None => complete(HttpResponse(StatusCodes.NotFound))
+                      case None => complete(HttpResponse(StatusCodes.NotFound, entity = "There is no such post."))
                     }
                     case Failure(e) => throw e
                   }

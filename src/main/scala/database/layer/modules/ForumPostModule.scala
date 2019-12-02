@@ -1,11 +1,12 @@
 package database.layer.modules
 
 import database.Profile
-import database.schema.FieldsValueClasses.Topic
-import database.schema.ForumPost
+import database.schema.FieldsValueClasses.{Content, Topic}
+import database.schema.{ForumPost, PK}
 import slick.jdbc.JdbcProfile
 
-trait ForumPostModule { self : Profile =>
+trait ForumPostModule {
+  self: Profile =>
 
   val profile: JdbcProfile
 
@@ -17,6 +18,12 @@ trait ForumPostModule { self : Profile =>
     insertPost += newPost
   }
 
-  def findPostWithTopic(topic: String) = posts.filter(_.topic === Topic(topic)).result.headOption
+  def findPost(id: Long) = posts.filter(_.id === PK[ForumPost](id)).result.headOption
+
+  def updatePost(id: Long, newContent: String) =
+    posts
+      .filter(_.id === PK[ForumPost](id))
+      .map(_.content)
+      .update(Content(newContent))
 
 }

@@ -16,9 +16,9 @@ object UserRequests {
                               email: Option[String]
                             )
 
-//  final case class UserEditPost(
-//                                 newContent: Option[String],
-//                                 secret: Option[String]
-//                               )
+  final case class UserEdit(
+                             newContent: String,
+                             secret: String
+                           )
 
 }

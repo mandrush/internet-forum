@@ -1,4 +1,4 @@
-package route
+package route.add
 
 import java.time.Instant
 
@@ -29,8 +29,7 @@ object NewPostRoute extends ForumJSONSupport
         } else {
           entity(as[UserCreatePost]) { request =>
             validateFields(request.email, Nickname(request.nickname), Content(request.content)) {
-              validate(checkField(Topic(request.topic), cCfg.minLen, cCfg.maxTopic),
-                "Topic needs to have between 1 and 80 characters!") {
+              validateField(Topic(request.topic), cCfg.minLen, cCfg.maxTopic) {
                 val newPost = ForumPost(Topic(request.topic),
                   Content(request.content),
                   Nickname(request.nickname),
@@ -53,4 +52,3 @@ object NewPostRoute extends ForumJSONSupport
     }
   }
 }
-

@@ -1,7 +1,7 @@
 package domain.logic
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import database.schema.{ForumPost, ForumReply}
-import domain.request.UserRequests.{UserCreatePost, UserReply}
+import domain.request.UserRequests.{UserCreatePost, UserEdit, UserReply}
 import spray.json.{DefaultJsonProtocol, JsObject, JsString, JsValue, RootJsonFormat}
 import spray.json._
 //https://doc.akka.io/docs/akka-http/current/common/json-support.html
@@ -35,5 +35,7 @@ trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val userCreateFormat = jsonFormat4(UserCreatePost)
 
   implicit val userReplyFormat = jsonFormat3(UserReply)
+
+  implicit val userEditFormat = jsonFormat2(UserEdit)
 
 }

@@ -26,7 +26,7 @@ class ForumReplyTable(tag: Tag) extends Table[ForumReply](tag, "ForumReply") {
 
   def email = column[Option[String]]("email")
 
-  def timestamp = column[Instant]("timestamp")
+  def timestamp: Rep[Instant] = column[Instant]("timestamp")
 
   def secret = column[Secret]("secret")
 

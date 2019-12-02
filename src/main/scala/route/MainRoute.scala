@@ -16,8 +16,10 @@ object MainRoute {
 
   implicit val dbLayer = new DatabaseLayer(PostgresProfile)
 
-  import NewPostRoute._
-  import NewReplyRoute._
+  import route.add.NewPostRoute._
+  import route.add.NewReplyRoute._
+  import route.edit.EditPostRoute._
+  import route.edit.EditReplyRoute._
 
   val mainRoute: Route =
     concat(
@@ -30,7 +32,13 @@ object MainRoute {
         newPostRoute
       },
       post {
-        newReplyPath
+        newReplyRoute
+      },
+      post {
+        editPostRoute
+      },
+      post {
+        editReplyRoute
       }
     )
 

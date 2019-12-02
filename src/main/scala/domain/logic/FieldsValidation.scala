@@ -13,21 +13,30 @@ trait FieldsValidation {
                     (inner: => Route)
                     (implicit cfg: ContemporaryConfig): Route = {
 
-    validate(validateEmail(email), "Email cannot be malformed!") {
+    validate(checkEmail(email), "Email cannot be malformed!") {
 
-      validate(checkField(nickname, cfg.minLen, cfg.maxNick), s"Nickname needs to have length between ${cfg.minLen} and ${cfg.maxNick} characters") {
+      validateField(nickname, cfg.minLen, cfg.maxNick) {
 
-          validate(checkField(content, cfg.minLen, cfg.maxContent), s"Content needs to have beetween ${cfg.minLen} and ${cfg.maxContent} characters!") {
-            inner
-          }
+        validateField(content, cfg.minLen, cfg.maxContent) {
+          inner
+        }
       }
     }
   }
+
+  def validateField(field: Requested, minLen: Int, maxLen: Int)
+                   (inner: => Route)
+                   (implicit cfg: ContemporaryConfig): Route = {
+    validate(checkField(field, minLen, maxLen), s"${field.getClass.getSimpleName} length needs to be between $minLen and $maxLen characters") {
+      inner
+    }
+  }
+
   //  using regex for this task is a BAD idea
   //    see https://stackoverflow.com/questions/201323/how-to-validate-an-email-address-using-a-regular-expression
-  private def validateEmail(email: Option[String]): Boolean = email.forall(EmailValidator.getInstance().isValid(_))
+  private def checkEmail(email: Option[String]): Boolean = email.forall(EmailValidator.getInstance().isValid(_))
 
-  def checkField(field: Requested, minLen: Int, maxLen: Int): Boolean = field.inner.length >= minLen && field.inner.length <= maxLen
+  private def checkField(field: Requested, minLen: Int, maxLen: Int): Boolean = field.inner.length >= minLen && field.inner.length <= maxLen
 
   def onlyContains(req: JsValue, fields: String*): Boolean = req.asJsObject.fields.keySet equals fields.toSet
 
