@@ -27,13 +27,13 @@ object EditPostRoute extends ForumJSONSupport with FieldsValidation {
           } else {
             entity(as[UserEdit]) { entity =>
               validateField(Content(entity.newContent), cCfg.minLen, cCfg.maxContent) {
-                val maybePost = dbLayer.exec(dbLayer.findPost(postId))
+                val maybePost = dbLayer.findPost(postId)
                 handleExceptions(databaseExceptionHandler) {
                   onComplete(maybePost) {
                     case Success(post) => post match {
                       case Some(p) =>
                         if (p.secret.value == entity.secret) {
-                          val update = dbLayer.exec(dbLayer.updatePost(postId, entity.newContent))
+                          val update = dbLayer.updatePost(postId, entity.newContent)
                           onComplete(update) {
                             case Success(_) =>
                               val updated = ForumPost(p.topic, Content(entity.newContent), p.nickname, p.email, p.secret, p.timestamp)

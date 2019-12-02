@@ -5,22 +5,32 @@ import database.schema.FieldsValueClasses.Content
 import database.schema.{ForumReply, PK}
 import slick.jdbc.JdbcProfile
 
-trait ForumReplyModule { self : Profile =>
+import scala.concurrent.Future
+
+trait ForumReplyModule {
+  self: Profile =>
 
   val profile: JdbcProfile
 
   import profile.api._
   import database.schema.ForumReplyOps._
 
-  def insertNewReply(newReply: ForumReply) = insertReply += newReply
+  def exec[T](action: DBIO[T]): Future[T]
 
-  def findReply(id: Long) = replies.filter(_.id === PK[ForumReply](id)).result.headOption
+  def insertNewReply(newReply: ForumReply) = exec(
+    insertReply += newReply
+  )
 
-  def updateReply(id: Long, newContent: String) =
+  def findReply(id: Long) = exec(
+    replies.filter(_.id === PK[ForumReply](id)).result.headOption
+  )
+
+  def updateReply(id: Long, newContent: String) = exec(
     replies
       .filter(_.id === PK[ForumReply](id))
       .map(_.content)
       .update(Content(newContent))
+  )
 
 
 }

@@ -31,7 +31,7 @@ object NewReplyRoute extends ForumJSONSupport
           else {
             entity(as[UserReply]) { reply =>
               validateFields(reply.email, Nickname(reply.nickname), Content(reply.content)) {
-                val maybePost = dbLayer.exec(dbLayer.findPost(postId))
+                val maybePost = dbLayer.findPost(postId)
                 handleExceptions(databaseExceptionHandler) {
                   onComplete(maybePost) {
                     case Success(p) => p match {
@@ -42,7 +42,7 @@ object NewReplyRoute extends ForumJSONSupport
                           Instant.now,
                           newSecret,
                           found.id)
-                        val saved = dbLayer.exec(dbLayer.insertNewReply(newReply))
+                        val saved = dbLayer.insertNewReply(newReply)
                         onComplete(saved) {
                           case Success(_) => complete(newReply)
                           case Failure(e) => throw e

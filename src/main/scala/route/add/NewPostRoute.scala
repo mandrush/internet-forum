@@ -37,7 +37,7 @@ object NewPostRoute extends ForumJSONSupport
                   newSecret,
                   Instant.now
                 )
-                val saved = dbLayer.exec(dbLayer.insertNewPost(newPost))
+                val saved = dbLayer.insertNewPost(newPost)
                 handleExceptions(databaseExceptionHandler) {
                   onComplete(saved) {
                     case Success(_) => complete(newPost)
