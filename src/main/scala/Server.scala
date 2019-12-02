@@ -9,7 +9,7 @@ object Server extends App {
   private implicit val ec = system.dispatcher
 
 
-  import route.Routes._
+  import route.MainRoute._
 
   val bindingFuture = Http().bindAndHandle(mainRoute, "localhost", 8080)
 

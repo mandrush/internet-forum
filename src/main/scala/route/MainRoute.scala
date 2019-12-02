@@ -1,0 +1,39 @@
+package route
+
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import akka.http.scaladsl.server.Directives.{complete, concat, get, path, post, _}
+import akka.http.scaladsl.server.{Route, StandardRoute}
+import database.layer.DatabaseLayer
+import slick.jdbc.PostgresProfile
+
+object MainRoute {
+
+  import domain.PathNames._
+
+  sealed case class ContemporaryConfig(maxNick: Int = 21, maxTopic: Int = 80, maxContent: Int = 400, minLen: Int = 1)
+
+  implicit val cCfg = ContemporaryConfig()
+
+  implicit val dbLayer = new DatabaseLayer(PostgresProfile)
+
+  import NewPostRoute._
+  import NewReplyRoute._
+
+  val mainRoute: Route =
+    concat(
+      get {
+        path(HelloPath) {
+          hello
+        }
+      },
+      post {
+        newPostRoute
+      },
+      post {
+        newReplyPath
+      }
+    )
+
+  private def hello: StandardRoute = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>Say hello</h1>"))
+
+}

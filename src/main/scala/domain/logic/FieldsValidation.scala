@@ -4,7 +4,8 @@ import akka.http.scaladsl.server.Directives.validate
 import akka.http.scaladsl.server.Route
 import database.schema.FieldsValueClasses._
 import org.apache.commons.validator.routines.EmailValidator
-import route.Routes.ContemporaryConfig
+import route.MainRoute.ContemporaryConfig
+import spray.json.JsValue
 
 trait FieldsValidation {
 
@@ -27,5 +28,7 @@ trait FieldsValidation {
   private def validateEmail(email: Option[String]): Boolean = email.forall(EmailValidator.getInstance().isValid(_))
 
   def checkField(field: Requested, minLen: Int, maxLen: Int): Boolean = field.inner.length >= minLen && field.inner.length <= maxLen
+
+  def onlyContains(req: JsValue, fields: String*): Boolean = req.asJsObject.fields.keySet equals fields.toSet
 
 }

@@ -32,7 +32,7 @@ class ForumReplyTable(tag: Tag) extends Table[ForumReply](tag, "ForumReply") {
 
   def parentId = column[PK[ForumPost]]("parent_id")
 
-  def id = column[PK[ForumReply]]("reply_id")
+  def id = column[PK[ForumReply]]("reply_id", O.PrimaryKey, O.AutoInc)
 
   override def * = (content, nickname, email, timestamp, secret, parentId, id) <> (ForumReply.tupled, ForumReply.unapply)
 
