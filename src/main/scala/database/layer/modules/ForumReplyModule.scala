@@ -45,6 +45,10 @@ trait ForumReplyModule {
 
   def exec[T](action: DBIO[T]): Future[T]
 
+  def selectAllReplies() = exec(
+    replies.result
+  )
+
   def insertNewReply(newReply: ForumReply) = exec(
     insertReply += newReply
   )

@@ -42,6 +42,10 @@ trait ForumPostModule {
 
   def exec[T](action: DBIO[T]): Future[T]
 
+  def selectAllPosts() = exec(
+    posts.result
+  )
+
   def insertNewPost(newPost: ForumPost) = exec(
     insertPost += newPost
   )
@@ -60,4 +64,5 @@ trait ForumPostModule {
   def deletePost(id: Long) = exec (
     posts.filter(_.id === PK[ForumPost](id)).delete
   )
+
 }
