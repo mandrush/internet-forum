@@ -12,10 +12,16 @@ class DatabaseLayer(val profile: JdbcProfile) extends
   ForumReplyModule with
   ForumPostModule {
 
-  val db = profile.backend.Database.forConfig("database")
-
   override val jdbcProfile = profile
 
   override def exec[T](action: DBIO[T]): Future[T] = db.run(action)
+
+  import profile.api._
+
+  val db = profile.backend.Database.forConfig("database")
+
+  def createSchema = exec(
+    (posts.schema ++ replies.schema).create
+  )
 
 }

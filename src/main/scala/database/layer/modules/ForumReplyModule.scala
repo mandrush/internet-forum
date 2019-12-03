@@ -1,19 +1,47 @@
 package database.layer.modules
 
+import java.time.Instant
+
 import database.Profile
-import database.schema.FieldsValueClasses.Content
-import database.schema.{ForumReply, PK}
+import database.schema.FieldsValueClasses.{Content, Nickname, Secret}
+import database.schema.{ForumPost, ForumReply, PK}
 import slick.jdbc.JdbcProfile
+import slick.model.ForeignKeyAction.Cascade
 
 import scala.concurrent.Future
 
 trait ForumReplyModule {
-  self: Profile =>
+  self: Profile with ForumPostModule =>
 
   val profile: JdbcProfile
 
+  import database.schema.CustomColumnTypes._
   import profile.api._
-  import database.schema.ForumReplyOps._
+
+  class ForumReplyTable(tag: Tag) extends Table[ForumReply](tag, "ForumReply") {
+    def content = column[Content]("content")
+
+    def nickname = column[Nickname]("nickname")
+
+    def email = column[Option[String]]("email")
+
+    def timestamp: Rep[Instant] = column[Instant]("timestamp")
+
+    def secret = column[Secret]("secret")
+
+    def parentId = column[PK[ForumPost]]("parent_id")
+
+    def id = column[PK[ForumReply]]("reply_id", O.PrimaryKey, O.AutoInc)
+
+    override def * = (content, nickname, email, timestamp, secret, parentId, id) <> (ForumReply.tupled, ForumReply.unapply)
+
+    def parent = foreignKey("post_fk", parentId, posts)(_.id, onDelete = Cascade, onUpdate = Cascade)
+
+  }
+
+  lazy val replies = TableQuery[ForumReplyTable]
+  lazy val insertReply = replies returning replies.map(_.id.value)
+
 
   def exec[T](action: DBIO[T]): Future[T]
 
@@ -36,5 +64,5 @@ trait ForumReplyModule {
     replies.filter(_.id === PK[ForumReply](id)).delete
   )
 
-
 }
+
