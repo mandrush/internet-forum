@@ -32,5 +32,9 @@ trait ForumReplyModule {
       .update(Content(newContent))
   )
 
+  def deleteReply(id: Long) = exec (
+    replies.filter(_.id === PK[ForumReply](id)).delete
+  )
+
 
 }

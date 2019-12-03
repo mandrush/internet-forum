@@ -8,5 +8,7 @@ object PathNames {
   val CreateReply = "reply-to"
   val EditPost = "edit-post"
   val EditReply = "edit-reply"
+  val DeletePost = "delete-post"
+  val DeleteReply = "delete-reply"
 
 }

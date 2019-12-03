@@ -20,6 +20,8 @@ object MainRoute {
   import route.add.NewReplyRoute._
   import route.edit.EditPostRoute._
   import route.edit.EditReplyRoute._
+  import route.delete.DeletePostRoute._
+  import route.delete.DeleteReplyRoute._
 
   val mainRoute: Route =
     concat(
@@ -39,6 +41,12 @@ object MainRoute {
       },
       post {
         editReplyRoute
+      },
+      post {
+        deletePostRoute
+      },
+      post {
+        deleteReplyRoute
       }
     )
 

@@ -32,4 +32,8 @@ trait ForumPostModule {
       .map(_.content)
       .update(Content(newContent))
   )
+
+  def deletePost(id: Long) = exec (
+    posts.filter(_.id === PK[ForumPost](id)).delete
+  )
 }

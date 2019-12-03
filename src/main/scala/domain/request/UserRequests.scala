@@ -21,4 +21,8 @@ object UserRequests {
                              secret: String
                            )
 
+  final case class Deletion(
+                           secret: String
+                           )
+
 }
