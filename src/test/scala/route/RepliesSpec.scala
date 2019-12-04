@@ -102,7 +102,52 @@ class RepliesSpec extends WordSpec with Matchers with ForumJSONSupport with Scal
       }
     }
 
+    s"Respond with 400 Bad Request when the nickname is empty or too long" in {
+      val reply = Marshal(newReplyRequest.copy(nickname = "")).to[MessageEntity].futureValue
+      Post(s"$createReplyPath?post_id=1").withEntity(reply) ~> Route.seal(newReplyRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
 
+      val tooLong = "nicknicknicknicknicknicknicknicknicknicknick"
+      val wrong = Marshal(newReplyRequest.copy(nickname = tooLong)).to[MessageEntity].futureValue
+      Post(s"$createReplyPath?post_id=1").withEntity(wrong) ~> Route.seal(newReplyRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+    }
+
+    s"Respond with 400 Bad Request when the content is empty or too long" in {
+      val reply = Marshal(newReplyRequest.copy(content = "")).to[MessageEntity].futureValue
+      Post(s"$createReplyPath?post_id=1").withEntity(reply) ~> Route.seal(newReplyRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+
+      val tooLong =
+        """SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+        """.stripMargin
+      val wrong = Marshal(newReplyRequest.copy(content = tooLong)).to[MessageEntity].futureValue
+      Post(s"$createReplyPath?post_id=1").withEntity(wrong) ~> Route.seal(newReplyRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+    }
+
+    "not create a new reply when the email is malformed and respond with 400 Bad Request" in {
+      val badEmailExamples = Seq(
+        Some("what@w"),
+        Some("what@w."),
+        Some("what@w.w.w"),
+        Some("what@w.."),
+        Some("what.")
+      )
+      badEmailExamples.map { wrongMail =>
+        Post(s"$createReplyPath?post_id=1").withEntity(Marshal(newReplyRequest.copy(email = wrongMail)).to[MessageEntity].futureValue) ~> Route.seal(newReplyRoute) ~> check {
+          status shouldBe StatusCodes.BadRequest
+        }
+      }
+    }
   }
 
   s"Server processing POST requests for $editReplyPath" should {
@@ -143,6 +188,26 @@ class RepliesSpec extends WordSpec with Matchers with ForumJSONSupport with Scal
         status shouldBe StatusCodes.Unauthorized
       }
     }
+
+    "respond with 400 Bad Request and not edit the reply when the new content is empty or too long" in {
+      val reply = Marshal(editReplyRequest.copy(newContent = "")).to[MessageEntity].futureValue
+      Post(s"$editReplyPath?reply_id=$replyId").withEntity(reply) ~> Route.seal(editReplyRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+
+      val tooLong =
+        """SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+        """.stripMargin
+      val tooLongReply = Marshal(editReplyRequest.copy(newContent = tooLong)).to[MessageEntity].futureValue
+      Post(s"$editReplyPath?reply_id=$replyId").withEntity(tooLongReply) ~> Route.seal(editReplyRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+    }
+
   }
 
   s"Server processing POST requests for $deleteReplyPath" should {

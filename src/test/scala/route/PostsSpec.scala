@@ -87,23 +87,47 @@ class PostsSpec extends WordSpec with Matchers with ForumJSONSupport with ScalaF
       }
     }
 
-    "not create a new post when the topic is empty and respond with 400 Bad Request" in {
+    "not create a new post when the topic is empty or too long and respond with 400 Bad Request" in {
       val post = Marshal(newPostRequest.copy(topic = "")).to[MessageEntity].futureValue
       Post(s"$createPostPath").withEntity(post) ~> Route.seal(newPostRoute) ~> check {
         status shouldBe StatusCodes.BadRequest
       }
-    }
 
-    "not create a new post when the nickname is empty and respond with 400 Bad Request" in {
-      val post = Marshal(newPostRequest.copy(nickname = "")).to[MessageEntity].futureValue
-      Post(s"$createPostPath").withEntity(post) ~> Route.seal(newPostRoute) ~> check {
+      val tooLong = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      val wrong = Marshal(newPostRequest.copy(topic = tooLong)).to[MessageEntity].futureValue
+      Post(s"$createPostPath").withEntity(wrong) ~> Route.seal(newPostRoute) ~> check {
         status shouldBe StatusCodes.BadRequest
       }
     }
 
-    "not create a new post when the content is empty and respond with 400 Bad Request" in {
+    "not create a new post when the nickname is empty or too long and respond with 400 Bad Request" in {
+      val post = Marshal(newPostRequest.copy(nickname = "")).to[MessageEntity].futureValue
+      Post(s"$createPostPath").withEntity(post) ~> Route.seal(newPostRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+
+      val tooLong = "nicknicknicknicknicknicknicknicknicknicknick"
+      val wrong = Marshal(newPostRequest.copy(nickname = tooLong)).to[MessageEntity].futureValue
+      Post(s"$createPostPath").withEntity(wrong) ~> Route.seal(newPostRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+    }
+
+    "not create a new post when the content is empty or too long and respond with 400 Bad Request" in {
       val post = Marshal(newPostRequest.copy(content = "")).to[MessageEntity].futureValue
       Post(s"$createPostPath").withEntity(post) ~> Route.seal(newPostRoute) ~> check {
+        status shouldBe StatusCodes.BadRequest
+      }
+
+      val tooLong =
+        """SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
+        """.stripMargin
+      val wrong = Marshal(newPostRequest.copy(content = tooLong)).to[MessageEntity].futureValue
+      Post(s"$createPostPath").withEntity(wrong) ~> Route.seal(newPostRoute) ~> check {
         status shouldBe StatusCodes.BadRequest
       }
     }
@@ -120,36 +144,6 @@ class PostsSpec extends WordSpec with Matchers with ForumJSONSupport with ScalaF
         Post(s"$createPostPath").withEntity(Marshal(newPostRequest.copy(email = wrongMail)).to[MessageEntity].futureValue) ~> Route.seal(newPostRoute) ~> check {
           status shouldBe StatusCodes.BadRequest
         }
-      }
-    }
-
-    "not create a new post when the nickname is too long" in {
-      val tooLong = "nicknicknicknicknicknicknicknicknicknicknick"
-      val wrong = Marshal(newPostRequest.copy(nickname = tooLong)).to[MessageEntity].futureValue
-      Post(s"$createPostPath").withEntity(wrong) ~> Route.seal(newPostRoute) ~> check {
-        status shouldBe StatusCodes.BadRequest
-      }
-    }
-
-    "not create a new post when the topic is too long" in {
-      val tooLong = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-      val wrong = Marshal(newPostRequest.copy(topic = tooLong)).to[MessageEntity].futureValue
-      Post(s"$createPostPath").withEntity(wrong) ~> Route.seal(newPostRoute) ~> check {
-        status shouldBe StatusCodes.BadRequest
-      }
-    }
-
-    "not create a new post when the content is too long" in {
-      val tooLong =
-        """SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
-          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
-          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
-          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
-          |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
-        """.stripMargin
-      val wrong = Marshal(newPostRequest.copy(content = tooLong)).to[MessageEntity].futureValue
-      Post(s"$createPostPath").withEntity(wrong) ~> Route.seal(newPostRoute) ~> check {
-        status shouldBe StatusCodes.BadRequest
       }
     }
   }
@@ -193,14 +187,12 @@ class PostsSpec extends WordSpec with Matchers with ForumJSONSupport with ScalaF
       }
     }
 
-    "respond with 400 Bad Request and not edit the post when the new content is empty" in {
+    "respond with 400 Bad Request and not edit the post when the new content is empty or too long" in {
       val post = Marshal(editPostRequest.copy(newContent = "")).to[MessageEntity].futureValue
       Post(s"$editPostPath?post_id=$postId").withEntity(post) ~> Route.seal(editPostRoute) ~> check {
         status shouldBe StatusCodes.BadRequest
       }
-    }
 
-    "respond with 400 Bad Request and not edit the post when the new content is too long" in {
       val tooLong =
         """SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
           |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
@@ -208,12 +200,11 @@ class PostsSpec extends WordSpec with Matchers with ForumJSONSupport with ScalaF
           |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
           |SPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAMSPAM
         """.stripMargin
-      val post = Marshal(editPostRequest.copy(newContent = tooLong)).to[MessageEntity].futureValue
-      Post(s"$editPostPath?post_id=$postId").withEntity(post) ~> Route.seal(editPostRoute) ~> check {
+      val tooLongPost = Marshal(editPostRequest.copy(newContent = tooLong)).to[MessageEntity].futureValue
+      Post(s"$editPostPath?post_id=$postId").withEntity(tooLongPost) ~> Route.seal(editPostRoute) ~> check {
         status shouldBe StatusCodes.BadRequest
       }
     }
-
   }
 
   s"Server processing POST requests for $deletePostPath" should {
