@@ -9,3 +9,4 @@ libraryDependencies ++= tests
 libraryDependencies ++= commonsLang3
 libraryDependencies += slick
 libraryDependencies += postgres
+libraryDependencies ++= logback

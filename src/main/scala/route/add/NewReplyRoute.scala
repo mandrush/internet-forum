@@ -3,17 +3,17 @@ package route.add
 import java.time.Instant
 
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route}
 import database.layer.DatabaseLayer
 import database.schema.FieldsValueClasses.{Content, Nickname}
-import database.schema.{ForumPost, ForumReply, PK}
+import database.schema.{ForumReply, PK}
 import domain.PathNames.CreateReply
 import domain.logic.{FieldsValidation, ForumJSONSupport, SecretGenerator}
 import domain.rejection.ExceptionHandlers.databaseExceptionHandler
 import domain.request.UserRequests.UserReply
-import route.MainRoute.ContemporaryConfig
+import route.AppConfig
 import spray.json.JsValue
-import akka.http.scaladsl.server.Directives._
 
 import scala.util.{Failure, Success}
 
@@ -22,7 +22,7 @@ object NewReplyRoute extends ForumJSONSupport
   with SecretGenerator {
 
   def newReplyRoute(implicit dbLayer: DatabaseLayer,
-                    cCfg: ContemporaryConfig): Route =
+                    cCfg: AppConfig): Route =
     path(CreateReply) {
       parameter('post_id.as[Long]) { postId =>
         entity(as[JsValue]) { req =>

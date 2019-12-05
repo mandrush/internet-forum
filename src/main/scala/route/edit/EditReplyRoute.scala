@@ -9,7 +9,7 @@ import database.schema.ForumReply
 import domain.logic.{FieldsValidation, ForumJSONSupport}
 import domain.rejection.ExceptionHandlers.databaseExceptionHandler
 import domain.request.UserRequests.UserEdit
-import route.MainRoute.ContemporaryConfig
+import route.AppConfig
 import spray.json.JsValue
 
 import scala.util.{Failure, Success}
@@ -19,7 +19,7 @@ object EditReplyRoute extends ForumJSONSupport with FieldsValidation {
   import domain.PathNames._
 
   def editReplyRoute(implicit dbLayer: DatabaseLayer,
-                     cCfg: ContemporaryConfig): Route = {
+                     cCfg: AppConfig): Route = {
     path(EditReply) {
       parameter('reply_id.as[Long]) { replyId =>
         entity(as[JsValue]) { req =>
@@ -27,7 +27,7 @@ object EditReplyRoute extends ForumJSONSupport with FieldsValidation {
             reject(MalformedFormFieldRejection("", s"""For edits only "newContent" and "secret" fields are allowed"""))
           } else {
             entity(as[UserEdit]) { entity =>
-              validateField(Content(entity.newContent), cCfg.minLen, cCfg.maxContent) {
+              validateField(Content(entity.newContent), cCfg.minimumLength, cCfg.maxContentLength) {
                 val maybeReply = dbLayer.findReply(replyId)
                 handleExceptions(databaseExceptionHandler) {
                   onComplete(maybeReply) {

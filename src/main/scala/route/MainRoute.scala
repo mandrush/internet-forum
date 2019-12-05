@@ -1,20 +1,17 @@
 package route
 
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives.{complete, concat, get, path, post, _}
-import akka.http.scaladsl.server.{Route, StandardRoute}
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives.{concat, get, post}
+import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
 import database.layer.DatabaseLayer
-import slick.jdbc.PostgresProfile
+import logger.StandaloneLogger
 
-object MainRoute {
+class MainRoute(implicit appCfg: AppConfig, dbLayer: DatabaseLayer) extends StandaloneLogger {
 
-  import domain.PathNames._
-
-  sealed case class ContemporaryConfig(maxNick: Int = 21, maxTopic: Int = 80, maxContent: Int = 400, minLen: Int = 1, maxPaginationLimit: Int = 5)
-
-  implicit val cCfg = ContemporaryConfig()
-
-  implicit val dbLayer = new DatabaseLayer(PostgresProfile)
+  def setupRouting(host: String, port: Int)
+                  (implicit system: ActorSystem, materializer: ActorMaterializer) = Http().bindAndHandle(mainRoute, host, port)
 
   import route.add.NewPostRoute._
   import route.add.NewReplyRoute._

@@ -7,7 +7,7 @@ import database.layer.DatabaseLayer
 import domain.PathNames._
 import domain.logic.{FieldsValidation, ForumJSONSupport}
 import domain.request.UserRequests.Deletion
-import route.MainRoute.ContemporaryConfig
+import route.AppConfig
 import spray.json.JsValue
 
 import scala.util.{Failure, Success}
@@ -15,7 +15,7 @@ import scala.util.{Failure, Success}
 object DeleteReplyRoute extends ForumJSONSupport with FieldsValidation {
 
   def deleteReplyRoute(implicit dbLayer: DatabaseLayer,
-                       cCfg: ContemporaryConfig): Route = {
+                       cCfg: AppConfig): Route = {
     path(DeleteReply) {
       parameter('reply_id.as[Long]) { replyId =>
         entity(as[JsValue]) { req =>

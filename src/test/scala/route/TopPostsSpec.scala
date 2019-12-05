@@ -14,7 +14,6 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import domain.PathNames._
 import domain.logic.ForumJSONSupport
-import route.MainRoute.ContemporaryConfig
 import route.pagination.TopPostsRoute
 
 import scala.concurrent.duration._
@@ -23,9 +22,10 @@ import scala.concurrent.Await
 class TopPostsSpec extends WordSpec with ScalatestRouteTest with DatabaseSetup with BeforeAndAfterAll with Matchers with ScalaFutures with ForumJSONSupport {
 
   val path = "/" + GetTopPosts
-  val topPostRoute = TopPostsRoute.topPostsRoute
 
-  implicit val cCfg = ContemporaryConfig()
+  implicit val cCfg = Configurator.provideAppConfig()
+
+  val topPostRoute = TopPostsRoute.topPostsRoute
 
   override protected def beforeAll(): Unit = {
     setupDb()

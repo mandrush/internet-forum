@@ -11,7 +11,7 @@ import domain.PathNames.CreatePost
 import domain.logic.{FieldsValidation, ForumJSONSupport, SecretGenerator}
 import domain.rejection.ExceptionHandlers.databaseExceptionHandler
 import domain.request.UserRequests.UserCreatePost
-import route.MainRoute.ContemporaryConfig
+import route.AppConfig
 import spray.json.JsValue
 
 import scala.util.{Failure, Success}
@@ -21,7 +21,7 @@ object NewPostRoute extends ForumJSONSupport
   with SecretGenerator {
 
   def newPostRoute(implicit dbLayer: DatabaseLayer,
-                   cCfg: ContemporaryConfig): Route = {
+                   cCfg: AppConfig): Route = {
     path(CreatePost) {
       entity(as[JsValue]) { req =>
         if (!onlyContains(req, "topic", "content", "nickname", "email")) {
@@ -29,7 +29,7 @@ object NewPostRoute extends ForumJSONSupport
         } else {
           entity(as[UserCreatePost]) { request =>
             validateFields(request.email, Nickname(request.nickname), Content(request.content)) {
-              validateField(Topic(request.topic), cCfg.minLen, cCfg.maxTopic) {
+              validateField(Topic(request.topic), cCfg.minimumLength, cCfg.maxTopicLength) {
                 val creationTime = Instant.now
                 val newPost = ForumPost(Topic(request.topic),
                   Content(request.content),

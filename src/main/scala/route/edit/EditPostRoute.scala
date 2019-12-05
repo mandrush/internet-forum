@@ -1,18 +1,16 @@
 package route.edit
 
-import java.time.Instant
-
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route}
 import database.layer.DatabaseLayer
-import domain.logic.{FieldsValidation, ForumJSONSupport}
-import route.MainRoute.ContemporaryConfig
-import domain.PathNames._
-import akka.http.scaladsl.server.Directives._
 import database.schema.FieldsValueClasses.Content
 import database.schema.ForumPost
+import domain.PathNames._
+import domain.logic.{FieldsValidation, ForumJSONSupport}
 import domain.rejection.ExceptionHandlers.databaseExceptionHandler
 import domain.request.UserRequests.UserEdit
+import route.AppConfig
 import spray.json.JsValue
 
 import scala.util.{Failure, Success}
@@ -20,7 +18,7 @@ import scala.util.{Failure, Success}
 object EditPostRoute extends ForumJSONSupport with FieldsValidation {
 
   def editPostRoute(implicit dbLayer: DatabaseLayer,
-                    cCfg: ContemporaryConfig): Route = {
+                    cCfg: AppConfig): Route = {
     path(EditPost) {
       parameter('post_id.as[Long]) { postId =>
         entity(as[JsValue]) { req =>
@@ -28,7 +26,7 @@ object EditPostRoute extends ForumJSONSupport with FieldsValidation {
             reject(MalformedFormFieldRejection("", s"""For edits only "newContent" and "secret" fields are allowed"""))
           } else {
             entity(as[UserEdit]) { entity =>
-              validateField(Content(entity.newContent), cCfg.minLen, cCfg.maxContent) {
+              validateField(Content(entity.newContent), cCfg.minimumLength, cCfg.maxContentLength) {
                 val maybePost = dbLayer.findPost(postId)
                 handleExceptions(databaseExceptionHandler) {
                   onComplete(maybePost) {

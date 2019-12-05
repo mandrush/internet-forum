@@ -15,7 +15,6 @@ import domain.request.UserRequests
 import domain.request.UserRequests.{Deletion, UserCreatePost, UserEdit, UserReply}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-import route.MainRoute.ContemporaryConfig
 import route.add.NewPostRoute._
 import route.edit.EditPostRoute._
 import route.delete.DeletePostRoute._
@@ -29,7 +28,7 @@ class PostsSpec extends WordSpec with Matchers with ForumJSONSupport with ScalaF
     setupDb()
   }
 
-  implicit val cCfg = ContemporaryConfig()
+  implicit val cCfg = Configurator.provideAppConfig()
 
   val createPostPath = "/" + CreatePost
   val editPostPath = "/" + EditPost

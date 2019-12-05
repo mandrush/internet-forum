@@ -26,4 +26,9 @@ object Dependencies {
 
   val postgres = "org.postgresql" % "postgresql" % "42.2.8"
 
+  val logback = Seq(
+    "ch.qos.logback" % "logback-classic" % "1.2.3"
+  )
+
+
 }

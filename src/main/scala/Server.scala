@@ -1,17 +1,23 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import database.layer.DatabaseLayer
+import logger.StandaloneLogger
+import route.{Configurator, MainRoute}
+import slick.jdbc.PostgresProfile
 
-object Server extends App {
+object Server extends App with StandaloneLogger {
 
-  private implicit val system = ActorSystem("4chan")
-  private implicit val materializer = ActorMaterializer()
-  private implicit val ec = system.dispatcher
+  implicit val system = ActorSystem("kafeteria")
+  implicit val materializer = ActorMaterializer()
+  implicit val ec = system.dispatcher
 
+  implicit val appCfg = Configurator.provideAppConfig()
+  implicit val dbLayer = new DatabaseLayer(PostgresProfile)
 
-  import route.MainRoute._
+  val routing = new MainRoute()
+  routing.setupRouting(appCfg.host, appCfg.port)
 
-  val bindingFuture = Http().bindAndHandle(mainRoute, "localhost", 8080)
-
+  logger.info(s"Server started at http://${appCfg.host}:${appCfg.port}")
 }
 

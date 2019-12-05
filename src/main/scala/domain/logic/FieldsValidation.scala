@@ -4,20 +4,20 @@ import akka.http.scaladsl.server.Directives.validate
 import akka.http.scaladsl.server.Route
 import database.schema.FieldsValueClasses._
 import org.apache.commons.validator.routines.EmailValidator
-import route.MainRoute.ContemporaryConfig
+import route.AppConfig
 import spray.json.JsValue
 
 trait FieldsValidation {
 
   def validateFields(email: Option[String], nickname: Nickname, content: Content)
                     (inner: => Route)
-                    (implicit cfg: ContemporaryConfig): Route = {
+                    (implicit cfg: AppConfig): Route = {
 
     validate(checkEmail(email), "Email cannot be malformed!") {
 
-      validateField(nickname, cfg.minLen, cfg.maxNick) {
+      validateField(nickname, cfg.minimumLength, cfg.maxNickLength) {
 
-        validateField(content, cfg.minLen, cfg.maxContent) {
+        validateField(content, cfg.minimumLength, cfg.maxContentLength) {
           inner
         }
       }
@@ -26,7 +26,7 @@ trait FieldsValidation {
 
   def validateField(field: Requested, minLen: Int, maxLen: Int)
                    (inner: => Route)
-                   (implicit cfg: ContemporaryConfig): Route = {
+                   (implicit cfg: AppConfig): Route = {
     validate(checkField(field, minLen, maxLen), s"${field.getClass.getSimpleName} length needs to be between $minLen and $maxLen characters") {
       inner
     }

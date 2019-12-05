@@ -1,13 +1,13 @@
 package route.delete
 
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import domain.logic.{FieldsValidation, ForumJSONSupport}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route}
 import database.layer.DatabaseLayer
-import route.MainRoute.ContemporaryConfig
 import domain.PathNames.DeletePost
+import domain.logic.{FieldsValidation, ForumJSONSupport}
 import domain.request.UserRequests.Deletion
+import route.AppConfig
 import spray.json.JsValue
 
 import scala.util.{Failure, Success}
@@ -15,7 +15,7 @@ import scala.util.{Failure, Success}
 object DeletePostRoute extends ForumJSONSupport with FieldsValidation {
 
   def deletePostRoute(implicit dbLayer: DatabaseLayer,
-                      cCfg: ContemporaryConfig): Route = {
+                      cCfg: AppConfig): Route = {
     path(DeletePost) {
       parameter('post_id.as[Long]) { postId =>
         entity(as[JsValue]) { req =>
