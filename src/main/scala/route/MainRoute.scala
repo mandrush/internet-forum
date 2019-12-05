@@ -18,10 +18,10 @@ object MainRoute {
 
   import route.add.NewPostRoute._
   import route.add.NewReplyRoute._
-  import route.edit.EditPostRoute._
-  import route.edit.EditReplyRoute._
   import route.delete.DeletePostRoute._
   import route.delete.DeleteReplyRoute._
+  import route.edit.EditPostRoute._
+  import route.edit.EditReplyRoute._
 
   val mainRoute: Route =
     concat(
