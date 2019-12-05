@@ -30,12 +30,14 @@ object NewPostRoute extends ForumJSONSupport
           entity(as[UserCreatePost]) { request =>
             validateFields(request.email, Nickname(request.nickname), Content(request.content)) {
               validateField(Topic(request.topic), cCfg.minLen, cCfg.maxTopic) {
+                val creationTime = Instant.now
                 val newPost = ForumPost(Topic(request.topic),
                   Content(request.content),
                   Nickname(request.nickname),
                   request.email,
                   newSecret,
-                  Instant.now
+                  creationTime,
+                  creationTime
                 )
                 val saved = dbLayer.insertNewPost(newPost)
                 handleExceptions(databaseExceptionHandler) {

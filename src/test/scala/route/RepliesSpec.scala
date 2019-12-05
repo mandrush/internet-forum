@@ -59,6 +59,7 @@ class RepliesSpec extends WordSpec with Matchers with ForumJSONSupport with Scal
     Nickname("@@@@"),
     Some("halo@jasio.pl"),
     Secret("123"),
+    Instant.now,
     Instant.now
   )
 

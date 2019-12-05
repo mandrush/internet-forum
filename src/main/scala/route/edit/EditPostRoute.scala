@@ -1,5 +1,7 @@
 package route.edit
 
+import java.time.Instant
+
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route}
 import database.layer.DatabaseLayer
@@ -33,10 +35,10 @@ object EditPostRoute extends ForumJSONSupport with FieldsValidation {
                     case Success(post) => post match {
                       case Some(p) =>
                         if (p.secret.value == entity.secret) {
-                          val update = dbLayer.updatePost(postId, entity.newContent)
+                          val update = dbLayer.updatePostContent(postId, entity.newContent)
                           onComplete(update) {
                             case Success(_) =>
-                              val updated = ForumPost(p.topic, Content(entity.newContent), p.nickname, p.email, p.secret, p.timestamp)
+                              val updated = ForumPost(p.topic, Content(entity.newContent), p.nickname, p.email, p.secret, p.createTs, p.createTs)
                               complete(updated)
                             case Failure(e) => throw e
                           }

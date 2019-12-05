@@ -10,7 +10,8 @@ case class ForumPost(
                       nickname: Nickname,
                       email: Option[String] = None,
                       secret: Secret,
-                      timestamp: Instant,
+                      createTs: Instant,
+                      updateTs: Instant,
                       id: PK[ForumPost] = PK[ForumPost](0L)
                     )
 

@@ -14,7 +14,8 @@ trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {
       "content" -> JsString(obj.content.value),
       "email" -> obj.email.toJson,
       "secret" -> JsString(obj.secret.value),
-      "timestamp" -> JsString(obj.timestamp.toString),
+      "created_at" -> JsString(obj.createTs.toString),
+      "last_update" -> JsString(obj.updateTs.toString),
       "id" -> JsString(obj.id.value.toString)
     )
 

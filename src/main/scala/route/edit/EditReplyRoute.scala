@@ -34,7 +34,7 @@ object EditReplyRoute extends ForumJSONSupport with FieldsValidation {
                     case Success(reply) => reply match {
                       case Some(r) =>
                         if (r.secret.value == entity.secret) {
-                          val update = dbLayer.updateReply(replyId, entity.newContent)
+                          val update = dbLayer.updateReplyContent(replyId, entity.newContent)
                           onComplete(update) {
                             case Success(_) =>
                               val updated = ForumReply(Content(entity.newContent), r.nickname, r.email, r.timestamp, r.secret, r.parentId)

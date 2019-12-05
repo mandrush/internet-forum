@@ -30,11 +30,13 @@ trait ForumPostModule {
 
     def secret: Rep[Secret] = column[Secret]("secret")
 
-    def timestamp: Rep[Instant] = column[Instant]("timestamp")
+    def createTs: Rep[Instant] = column[Instant]("create_ts")
+
+    def updateTs: Rep[Instant] = column[Instant]("update_ts")
 
     def id: Rep[PK[ForumPost]] = column[PK[ForumPost]]("post_id", O.PrimaryKey, O.AutoInc)
 
-    def * : ProvenShape[ForumPost] = (topic, content, nickname, email, secret, timestamp, id) <> (ForumPost.tupled, ForumPost.unapply)
+    def * : ProvenShape[ForumPost] = (topic, content, nickname, email, secret, createTs, updateTs, id) <> (ForumPost.tupled, ForumPost.unapply)
   }
 
   lazy val posts = TableQuery[ForumPostTable]
@@ -54,7 +56,7 @@ trait ForumPostModule {
     posts.filter(_.id === PK[ForumPost](id)).result.headOption
   )
 
-  def updatePost(id: Long, newContent: String) = exec(
+  def updatePostContent(id: Long, newContent: String) = exec(
     posts
       .filter(_.id === PK[ForumPost](id))
       .map(_.content)

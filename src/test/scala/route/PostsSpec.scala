@@ -149,7 +149,7 @@ class PostsSpec extends WordSpec with Matchers with ForumJSONSupport with ScalaF
   }
 
   s"Server processing POST requests for $editPostPath" should {
-    "respond with OK for a proper post edit request and properly update the post in DB" in {
+    "respond with OK for a proper post edit request and properly update the post content in DB " in {
       val edit = Marshal(editPostRequest).to[MessageEntity].futureValue
       Post(s"$editPostPath?post_id=$postId").withEntity(edit) ~> Route.seal(editPostRoute) ~> check {
         status shouldBe StatusCodes.OK

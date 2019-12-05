@@ -57,7 +57,7 @@ trait ForumReplyModule {
     replies.filter(_.id === PK[ForumReply](id)).result.headOption
   )
 
-  def updateReply(id: Long, newContent: String) = exec(
+  def updateReplyContent(id: Long, newContent: String) = exec(
     replies
       .filter(_.id === PK[ForumReply](id))
       .map(_.content)
