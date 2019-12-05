@@ -1,6 +1,9 @@
 package domain.logic
+import java.time.Instant
+
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import database.schema.{ForumPost, ForumReply}
+import database.schema.FieldsValueClasses.{Content, Nickname, Secret, Topic}
+import database.schema.{ForumPost, ForumReply, PK}
 import domain.request.UserRequests.{Deletion, UserCreatePost, UserEdit, UserReply}
 import spray.json.{DefaultJsonProtocol, JsObject, JsString, JsValue, RootJsonFormat}
 import spray.json._
@@ -19,7 +22,13 @@ trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {
       "id" -> JsString(obj.id.value.toString)
     )
 
-    override def read(json: JsValue): ForumPost = ???
+    override def read(json: JsValue): ForumPost = {
+      json.asJsObject.getFields("content", "created_at", "email", "id", "last_update", "nickname", "secret", "topic") match {
+        case Seq(JsString(content), JsString(createdAt), JsString(email), JsString(id), JsString(lastUpdate), JsString(nickname), JsString(secret), JsString(topic)) =>
+          ForumPost(Topic(topic), Content(content), Nickname(nickname), Some(email), Secret(secret), Instant.parse(createdAt), Instant.parse(lastUpdate), PK[ForumPost](id.toLong))
+        case _ => throw new DeserializationException("ForumPost expected")
+      }
+    }
   }
 
   implicit object ForumReplyFormat extends RootJsonFormat[ForumReply] {

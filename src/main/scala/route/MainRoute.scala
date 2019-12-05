@@ -10,7 +10,7 @@ object MainRoute {
 
   import domain.PathNames._
 
-  sealed case class ContemporaryConfig(maxNick: Int = 21, maxTopic: Int = 80, maxContent: Int = 400, minLen: Int = 1)
+  sealed case class ContemporaryConfig(maxNick: Int = 21, maxTopic: Int = 80, maxContent: Int = 400, minLen: Int = 1, maxPaginationLimit: Int = 5)
 
   implicit val cCfg = ContemporaryConfig()
 
@@ -22,14 +22,10 @@ object MainRoute {
   import route.delete.DeleteReplyRoute._
   import route.edit.EditPostRoute._
   import route.edit.EditReplyRoute._
+  import route.pagination.TopPostsRoute._
 
   val mainRoute: Route =
     concat(
-      get {
-        path(HelloPath) {
-          hello
-        }
-      },
       post {
         newPostRoute
       },
@@ -47,9 +43,10 @@ object MainRoute {
       },
       post {
         deleteReplyRoute
+      },
+      get {
+        topPostsRoute
       }
     )
-
-  private def hello: StandardRoute = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>Say hello</h1>"))
 
 }

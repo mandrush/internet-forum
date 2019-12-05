@@ -52,6 +52,10 @@ trait ForumPostModule {
     insertPost += newPost
   )
 
+  def insertManyPosts(posts: ForumPost*) = exec(
+    insertPost ++= posts
+  )
+
   def findPost(id: Long) = exec(
     posts.filter(_.id === PK[ForumPost](id)).result.headOption
   )
@@ -72,6 +76,14 @@ trait ForumPostModule {
 
   def deletePost(id: Long) = exec (
     posts.filter(_.id === PK[ForumPost](id)).delete
+  )
+
+  def getTopPosts(limit: Int, offset: Int) = exec (
+    posts
+      .sortBy(_.updateTs.desc)
+      .drop(offset)
+      .take(limit)
+      .result
   )
 
 
