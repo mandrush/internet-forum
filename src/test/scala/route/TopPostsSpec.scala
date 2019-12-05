@@ -83,7 +83,7 @@ class TopPostsSpec extends WordSpec with ScalatestRouteTest with DatabaseSetup w
       }
     }
 
-    s"respond with 200 OK and a proper page size limited by pre-configured max pagination limit when 'limit' param is too big" in {
+    s"respond with 200 OK and the page size should be limited by max pagination limit config when the 'limit' param exceeds the configured value" in {
       val limit = 100
       val offset = 0
       Get(s"$path?limit=$limit&offset=$offset") ~> Route.seal(topPostRoute) ~> check {
