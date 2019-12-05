@@ -63,8 +63,16 @@ trait ForumPostModule {
       .update(Content(newContent))
   )
 
+  def updatePostTimestamp(id: Long, updateTs: Instant) = exec(
+    posts
+      .filter(_.id === PK[ForumPost](id))
+      .map(_.updateTs)
+      .update(updateTs)
+  )
+
   def deletePost(id: Long) = exec (
     posts.filter(_.id === PK[ForumPost](id)).delete
   )
+
 
 }

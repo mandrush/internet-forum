@@ -37,13 +37,15 @@ object NewReplyRoute extends ForumJSONSupport
                   onComplete(maybePost) {
                     case Success(p) => p match {
                       case Some(found) =>
+                        val replyCreationTs = Instant.now
                         val newReply = ForumReply(Content(reply.content),
                           Nickname(reply.nickname),
                           reply.email,
-                          Instant.now,
+                          replyCreationTs,
                           newSecret,
                           found.id)
                         val saved = dbLayer.insertNewReply(newReply)
+                        dbLayer.updatePostTimestamp(postId, replyCreationTs)
                         onComplete(saved) {
                           case Success(x) => complete(newReply.copy(id = PK[ForumReply](x.value)))
                           case Failure(e) => throw e
