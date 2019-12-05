@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives.{as, complete, entity, handleExcepti
 import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route}
 import database.layer.DatabaseLayer
 import database.schema.FieldsValueClasses.{Content, Nickname, Topic}
-import database.schema.ForumPost
+import database.schema.{ForumPost, PK}
 import domain.PathNames.CreatePost
 import domain.logic.{FieldsValidation, ForumJSONSupport, SecretGenerator}
 import domain.rejection.ExceptionHandlers.databaseExceptionHandler
@@ -40,7 +40,7 @@ object NewPostRoute extends ForumJSONSupport
                 val saved = dbLayer.insertNewPost(newPost)
                 handleExceptions(databaseExceptionHandler) {
                   onComplete(saved) {
-                    case Success(_) => complete(newPost)
+                    case Success(x) => complete(newPost.copy(id = PK[ForumPost](x.value)))
                     case Failure(e) => throw e
                   }
                 }

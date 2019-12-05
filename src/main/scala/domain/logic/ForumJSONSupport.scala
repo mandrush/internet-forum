@@ -14,7 +14,8 @@ trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {
       "content" -> JsString(obj.content.value),
       "email" -> obj.email.toJson,
       "secret" -> JsString(obj.secret.value),
-      "timestamp" -> JsString(obj.timestamp.toString)
+      "timestamp" -> JsString(obj.timestamp.toString),
+      "id" -> JsString(obj.id.value.toString)
     )
 
     override def read(json: JsValue): ForumPost = ???
@@ -26,7 +27,8 @@ trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {
       "content" -> JsString(obj.content.value),
       "email" -> obj.email.toJson,
       "secret" -> JsString(obj.secret.value),
-      "timestamp" -> JsString(obj.timestamp.toString)
+      "timestamp" -> JsString(obj.timestamp.toString),
+      "id" -> JsString(obj.id.value.toString)
     )
 
     override def read(json: JsValue): ForumReply = ???

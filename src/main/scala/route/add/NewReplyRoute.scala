@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.{MalformedFormFieldRejection, Route}
 import database.layer.DatabaseLayer
 import database.schema.FieldsValueClasses.{Content, Nickname}
-import database.schema.ForumReply
+import database.schema.{ForumPost, ForumReply, PK}
 import domain.PathNames.CreateReply
 import domain.logic.{FieldsValidation, ForumJSONSupport, SecretGenerator}
 import domain.rejection.ExceptionHandlers.databaseExceptionHandler
@@ -14,6 +14,7 @@ import domain.request.UserRequests.UserReply
 import route.MainRoute.ContemporaryConfig
 import spray.json.JsValue
 import akka.http.scaladsl.server.Directives._
+
 import scala.util.{Failure, Success}
 
 object NewReplyRoute extends ForumJSONSupport
@@ -44,7 +45,7 @@ object NewReplyRoute extends ForumJSONSupport
                           found.id)
                         val saved = dbLayer.insertNewReply(newReply)
                         onComplete(saved) {
-                          case Success(_) => complete(newReply)
+                          case Success(x) => complete(newReply.copy(id = PK[ForumReply](x.value)))
                           case Failure(e) => throw e
                         }
                       case None => complete(HttpResponse(StatusCodes.NotFound, entity = "There is no such post."))
