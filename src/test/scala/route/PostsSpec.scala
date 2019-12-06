@@ -253,12 +253,15 @@ class PostsSpec extends WordSpec with Matchers with ForumJSONSupport with ScalaF
     }
   }
 
-}
+  "Overall, server" should {
+    "respond with 500 Internal Server Error when there's any problem with the database" in {
+      simulateDBMalfunction()
+      val post = Marshal(newPostRequest).to[MessageEntity].futureValue
+      Post(s"$createPostPath").withEntity(post) ~> Route.seal(newPostRoute) ~> check {
+        status shouldBe StatusCodes.InternalServerError
+      }
+    }
+  }
 
-//    "respond with Internal Server Error when there's an issue with DB" in {
-//      simulateDBMalfunction()
-//      val post = marshalledNewPost(newPostRequest)
-//      Post(s"$path").withEntity(post) ~> Route.seal(newPostRoute) ~> check {
-//        status shouldBe StatusCodes.InternalServerError
-//      }
-//    }
+
+}

@@ -26,12 +26,12 @@ trait DatabaseSetup {
     Await.result(create, 2.seconds)
   }
 
-//  def simulateDBMalfunction() = {
-//    val dropFP = dbLayer.exec(sql"""DROP TABLE IF EXISTS "ForumPost" CASCADE""".as[Long])
-//    val dropFR = dbLayer.exec(sql"""DROP TABLE IF EXISTS "ForumReply" CASCADE""".as[Long])
-//    Await.result(dropFP, 2.seconds)
-//    Await.result(dropFR, 2.seconds)
-//
-//  }
+  def simulateDBMalfunction() = {
+    val dropFP = dbLayer.exec(sql"""DROP TABLE IF EXISTS "ForumPost" CASCADE""".as[Long])
+    val dropFR = dbLayer.exec(sql"""DROP TABLE IF EXISTS "ForumReply" CASCADE""".as[Long])
+    Await.result(dropFP, 2.seconds)
+    Await.result(dropFR, 2.seconds)
+
+  }
 
 }
