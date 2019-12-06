@@ -53,13 +53,8 @@ object RepliesPaginationRoute extends ForumJSONSupport {
 
     if (maxPaginationLimit < before + after + 1) {
       val proportion = maxPaginationLimit.toFloat / (before + after + 1)
-      println(maxPaginationLimit)
-      println(before + after + 1)
-      println(proportion)
       val newBefore = (before * proportion).round
       val newAfter = (after * proportion).round
-      println(newBefore)
-      println(newAfter)
       replies.slice(pivot - newBefore, pivot + newAfter)
 
     } else {

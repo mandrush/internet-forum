@@ -1,7 +1,8 @@
 import Dependencies._
 
-scalaVersion := "2.13.1"
+name := "internet-forum"
 
+scalaVersion := "2.13.1"
 parallelExecution in Test := false
 
 libraryDependencies ++= akka
