@@ -10,9 +10,6 @@ import logger.StandaloneLogger
 
 class MainRoute(implicit appCfg: AppConfig, dbLayer: DatabaseLayer) extends StandaloneLogger {
 
-  def setupRouting(host: String, port: Int)
-                  (implicit system: ActorSystem, materializer: ActorMaterializer) = Http().bindAndHandle(mainRoute, host, port)
-
   import route.add.NewPostRoute._
   import route.add.NewReplyRoute._
   import route.delete.DeletePostRoute._
@@ -20,6 +17,10 @@ class MainRoute(implicit appCfg: AppConfig, dbLayer: DatabaseLayer) extends Stan
   import route.edit.EditPostRoute._
   import route.edit.EditReplyRoute._
   import route.pagination.TopPostsRoute._
+  import route.pagination.RepliesPaginationRoute._
+
+  def setupRouting(host: String, port: Int)
+                  (implicit system: ActorSystem, materializer: ActorMaterializer) = Http().bindAndHandle(mainRoute, host, port)
 
   val mainRoute: Route =
     concat(
@@ -43,6 +44,9 @@ class MainRoute(implicit appCfg: AppConfig, dbLayer: DatabaseLayer) extends Stan
       },
       get {
         topPostsRoute
+      },
+      get {
+        repliesPaginatedRoute
       }
     )
 

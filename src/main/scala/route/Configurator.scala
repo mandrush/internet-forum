@@ -45,7 +45,7 @@ case class AppConfig(
                       maxEmailLength: Int = 254,
                       maxContentLength: Int = 400,
                       maxTopicLength: Int = 80,
-                      maxPaginationLimit: Int = 5,
+                      maxPaginationLimit: Int = 7,
                       host: String = "localhost",
                       port: Int = 8080
                     ) {

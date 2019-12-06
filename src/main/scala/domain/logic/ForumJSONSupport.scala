@@ -26,7 +26,7 @@ trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {
       json.asJsObject.getFields("content", "created_at", "email", "id", "last_update", "nickname", "secret", "topic") match {
         case Seq(JsString(content), JsString(createdAt), JsString(email), JsString(id), JsString(lastUpdate), JsString(nickname), JsString(secret), JsString(topic)) =>
           ForumPost(Topic(topic), Content(content), Nickname(nickname), Some(email), Secret(secret), Instant.parse(createdAt), Instant.parse(lastUpdate), PK[ForumPost](id.toLong))
-        case _ => throw new DeserializationException("ForumPost expected")
+        case _ => throw DeserializationException("ForumPost expected")
       }
     }
   }
@@ -38,10 +38,17 @@ trait ForumJSONSupport extends SprayJsonSupport with DefaultJsonProtocol {
       "email" -> obj.email.toJson,
       "secret" -> JsString(obj.secret.value),
       "timestamp" -> JsString(obj.timestamp.toString),
-      "id" -> JsString(obj.id.value.toString)
+      "id" -> JsString(obj.id.value.toString),
+      "parent_id" -> JsString(obj.parentId.value.toString)
     )
 
-    override def read(json: JsValue): ForumReply = ???
+    override def read(json: JsValue): ForumReply = {
+      json.asJsObject.getFields("content", "email", "id", "nickname", "secret", "timestamp", "parent_id") match {
+        case Seq(JsString(content), JsString(email), JsString(id), JsString(nickname), JsString(secret), JsString(timestamp), JsString(parentId)) =>
+          ForumReply(Content(content), Nickname(nickname), Some(email), Instant.parse(timestamp), Secret(secret), PK[ForumPost](parentId.toLong), PK[ForumReply](id.toLong))
+        case _ => throw DeserializationException("ForumReply expected")
+      }
+    }
   }
 
   implicit val userCreateFormat = jsonFormat4(UserCreatePost)

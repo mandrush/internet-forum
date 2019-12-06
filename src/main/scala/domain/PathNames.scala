@@ -10,5 +10,6 @@ object PathNames {
   val DeleteReply = "delete-reply"
 
   val GetTopPosts = "top-posts"
+  val GetPaginatedReplies = "reply-list"
 
 }

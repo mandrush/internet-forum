@@ -53,6 +53,10 @@ trait ForumReplyModule {
     insertReply += newReply
   )
 
+  def insertManyReplies(replies: ForumReply*) = exec(
+    insertReply ++= replies
+  )
+
   def findReply(id: Long) = exec(
     replies.filter(_.id === PK[ForumReply](id)).result.headOption
   )
@@ -66,6 +70,14 @@ trait ForumReplyModule {
 
   def deleteReply(id: Long) = exec (
     replies.filter(_.id === PK[ForumReply](id)).delete
+  )
+
+  def repliesToPost(postId: Int) = exec(
+    (replies.filter(_.parentId === PK[ForumPost](postId))
+      join posts
+      on (_.parentId === _.id))
+      .sortBy(_._1.timestamp.asc)
+      .result
   )
 
 }
