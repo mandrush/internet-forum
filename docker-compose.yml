@@ -1,0 +1,11 @@
+version: '3'
+services:
+  forum:
+    build: .
+    ports:
+    - "8080:8080"
+  postgres:
+    build: run/db/.
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: admin
