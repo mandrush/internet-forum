@@ -2,15 +2,6 @@
 
 -- DROP DATABASE forumdb;
 
-CREATE DATABASE forumdb
-    WITH
-    OWNER = postgres
-    ENCODING = 'UTF8'
-    TABLESPACE = pg_default
-    CONNECTION LIMIT = -1;
-
-
-
 -- SCHEMA: public
 
 -- DROP SCHEMA public ;
@@ -30,23 +21,20 @@ GRANT ALL ON SCHEMA public TO postgres;
 
 -- DROP TABLE public."ForumPost";
 
-CREATE TABLE public."ForumPost"
+CREATE TABLE IF NOT EXISTS "ForumPost"
 (
-    topic character varying(80) COLLATE pg_catalog."default" NOT NULL,
-    content character varying(400) COLLATE pg_catalog."default" NOT NULL,
-    nickname character varying(21) COLLATE pg_catalog."default" NOT NULL,
-    email character varying(254) COLLATE pg_catalog."default",
-    secret character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    topic character varying(80)  NOT NULL,
+    content character varying(400) NOT NULL,
+    nickname character varying(21) NOT NULL,
+    email character varying(254),
+    secret character varying(10) NOT NULL,
     create_ts timestamp(6) without time zone NOT NULL,
     post_id BIGSERIAL PRIMARY KEY,
     update_ts timestamp without time zone NOT NULL
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
+);
 
-ALTER TABLE public."ForumPost"
+
+ALTER TABLE "ForumPost"
     OWNER to postgres;
 
 
@@ -54,25 +42,21 @@ ALTER TABLE public."ForumPost"
 
 -- DROP TABLE public."ForumReply";
 
-CREATE TABLE public."ForumReply"
+CREATE TABLE IF NOT EXISTS "ForumReply"
 (
-    content character varying(400) COLLATE pg_catalog."default" NOT NULL,
-    nickname character varying(21) COLLATE pg_catalog."default" NOT NULL,
-    email character varying(254) COLLATE pg_catalog."default",
+    content character varying(400) NOT NULL,
+    nickname character varying(21) NOT NULL,
+    email character varying(254),
     parent_id bigint NOT NULL,
     "timestamp" timestamp(4) without time zone NOT NULL,
     reply_id BIGSERIAL PRIMARY KEY,
-    secret character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    secret character varying(10) NOT NULL,
     CONSTRAINT post_fk FOREIGN KEY (parent_id)
-        REFERENCES public."ForumPost" (post_id) MATCH SIMPLE
+        REFERENCES "ForumPost" (post_id) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
         NOT VALID
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
+);
 
-ALTER TABLE public."ForumReply"
+ALTER TABLE "ForumReply"
     OWNER to postgres;
